@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lawn Mowing Ad - Meta Poster</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@400;600&display=swap');
 
@@ -11,11 +12,34 @@
 
     body {
       width: 1080px;
-      height: 1080px;
-      overflow: hidden;
       font-family: 'Montserrat', sans-serif;
-      background: #0a3d0a;
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 30px;
     }
+
+    /* Download button (outside poster, not captured) */
+    #download-btn {
+      margin: 24px 0 20px;
+      padding: 16px 48px;
+      background: #7ed957;
+      color: #0a3d0a;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(126,217,87,0.4);
+      transition: background 0.2s, transform 0.1s;
+    }
+    #download-btn:hover { background: #6bc947; }
+    #download-btn:active { transform: scale(0.97); }
+    #download-btn:disabled { opacity: 0.6; cursor: wait; }
 
     .poster {
       width: 1080px;
@@ -263,6 +287,7 @@
   </style>
 </head>
 <body>
+  <button id="download-btn" onclick="downloadPoster()">Download PNG</button>
   <div class="poster">
 
     <!-- Decorative circles -->
@@ -344,5 +369,31 @@
     </div>
 
   </div>
+
+  <script>
+    async function downloadPoster() {
+      const btn = document.getElementById('download-btn');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+
+      const poster = document.querySelector('.poster');
+      const canvas = await html2canvas(poster, {
+        width: 1080,
+        height: 1080,
+        scale: 1,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false
+      });
+
+      const link = document.createElement('a');
+      link.download = 'lawn-mowing-meta-ad.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      btn.disabled = false;
+      btn.textContent = 'Download PNG';
+    }
+  </script>
 </body>
 </html>
