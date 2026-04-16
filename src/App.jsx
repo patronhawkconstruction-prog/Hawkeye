@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import TodoInput from './components/TodoInput'
 import TodoList from './components/TodoList'
 import TodoFilter from './components/TodoFilter'
+import ProgressBar from './components/ProgressBar'
 import './App.css'
 
 const STORAGE_KEY = 'hawkeye-todos'
@@ -21,9 +22,9 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
 
-  function addTodo(text) {
+  function addTodo(text, priority, dueDate) {
     setTodos(prev => [
-      { id: Date.now(), text, completed: false },
+      { id: Date.now(), text, priority, dueDate: dueDate || null, completed: false },
       ...prev,
     ])
   }
@@ -32,6 +33,11 @@ export default function App() {
     setTodos(prev =>
       prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
     )
+  }
+
+  function toggleAll() {
+    const allDone = todos.every(t => t.completed)
+    setTodos(prev => prev.map(t => ({ ...t, completed: !allDone })))
   }
 
   function deleteTodo(id) {
@@ -54,7 +60,9 @@ export default function App() {
     return true
   })
 
-  const activeCount = todos.filter(t => !t.completed).length
+  const completedCount = todos.filter(t => t.completed).length
+  const activeCount = todos.length - completedCount
+  const allDone = todos.length > 0 && todos.every(t => t.completed)
 
   return (
     <div className="app">
@@ -69,13 +77,30 @@ export default function App() {
       <main className="main">
         <TodoInput onAdd={addTodo} />
 
+        {todos.length > 0 && (
+          <ProgressBar total={todos.length} completed={completedCount} />
+        )}
+
         {todos.length > 0 ? (
           <>
+            <div className="toggle-all-row">
+              <label className="toggle-all-label">
+                <input
+                  type="checkbox"
+                  className="toggle-all-check"
+                  checked={allDone}
+                  onChange={toggleAll}
+                  aria-label="Toggle all tasks"
+                />
+                <span>{allDone ? 'Unmark all' : 'Mark all complete'}</span>
+              </label>
+            </div>
+
             <TodoFilter
               filter={filter}
               onFilter={setFilter}
               activeCount={activeCount}
-              hasCompleted={todos.some(t => t.completed)}
+              hasCompleted={completedCount > 0}
               onClearCompleted={clearCompleted}
             />
             <TodoList
